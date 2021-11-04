@@ -1,12 +1,11 @@
 import tkinter as tk
 
-class TabsList(tk.Frame):
-    def __init__(self, parent, *args):
+class TabsList(tk.LabelFrame):
+    def __init__(self, parent, *args, **kwargs):
+        tk.LabelFrame.__init__(self, parent, **kwargs)
         self.tabs = []
         self.num_of_tabs = len(args)
         for i in range(0, self.num_of_tabs):
-            self.tabs.append(tk.Label(parent, text=args[i], width=30, height=10, bg="lightgreen"))
-    
-    def pack(self):
+            self.tabs.append(tk.Label(self, text=args[i], width=30, height=2))
         for i in range(0, self.num_of_tabs):
-            self.tabs[i].pack(side="left", fill="both", expand=True)
+            self.tabs[i].pack(side='left', fill="both", expand=True)
