@@ -5,9 +5,10 @@ import datetime as dt
 class Calendar(tk.LabelFrame):
     def __init__(self, parent, *args, **kwargs):
         tk.LabelFrame.__init__(self, parent, **kwargs)
-        self.now = dt.datetime.today()
+        self.now = dt.datetime.date(dt.datetime.today())
         self.current_date = self.now
         self.calendar = cldr.Calendar(firstweekday=0)
+        self.choosen_days = []
         self.form()
 
     def form(self):
@@ -28,10 +29,14 @@ class Calendar(tk.LabelFrame):
         i = 0
         for day in self.calendar.itermonthdates(self.current_date.year, self.current_date.month):
             self.days.append(tk.Label(self.weeks[i//7], text=day.day, width=7, height=2, bg='white'))
-            if day.month != self.current_date.month:
-                self.days[i].config(bg = 'gray')
+            if day.month == self.current_date.month:
+                self.days[i].bind('<Button-1>', lambda e, i=i, day=day: self.choose(self.days[i], day))
             if day.year == self.now.year and day.month == self.now.month and day.day == self.now.day:
                 self.days[i].config(bg = 'red')
+            if day in self.choosen_days:
+                self.days[i].config(bg = 'blue')
+            if day.month != self.current_date.month:
+                self.days[i].config(bg = 'gray')
             i += 1
         for week in self.weeks:
             week.pack(fill="both", expand=True)
@@ -70,3 +75,16 @@ class Calendar(tk.LabelFrame):
         else:
             self.current_date = dt.date(self.current_date.year + 1, 1, 1)
         self.form()
+        
+    def choose(self, label, day):
+        if not day in self.choosen_days:
+            label.config(bg='blue')
+            self.choosen_days.append(day)
+        else:
+            label.config(bg='white')
+            print(day)
+            print(self.now)
+            if day == self.now:
+                label.config(bg='red')
+            self.choosen_days.remove(day)
+        print(self.choosen_days)
