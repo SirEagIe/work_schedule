@@ -6,20 +6,67 @@ class Calendar(tk.LabelFrame):
     def __init__(self, parent, *args, **kwargs):
         tk.LabelFrame.__init__(self, parent, **kwargs)
         self.now = dt.datetime.today()
+        self.current_date = self.now
         self.calendar = cldr.Calendar(firstweekday=0)
-        self.month_and_year = tk.Label(self, text=self.now.strftime('%B')+', '+self.now.strftime('%Y'), bg='green')
-        self.month_and_year.pack(fill='both')
+        self.form()
+
+    def form(self):
+        self.head = tk.Frame(self)
+        self.month_and_year = tk.Label(self.head,
+            text=self.current_date.strftime('%B')+', '+self.current_date.strftime('%Y'),
+            bg='green', width=45)
+        self.button_left = tk.Button(self.head, text="<")
+        self.button_left.config(command=self.left)
+        self.button_right = tk.Button(self.head, text=">")
+        self.button_right.config(command=self.right)
+        self.button_left.pack(side='left', fill="both", expand=True)
+        self.month_and_year.pack(side='left', fill='both')
+        self.button_right.pack(side='right', fill="both", expand=True)
+        self.head.pack(fill='both')
         self.days = []
-        self.weeks = []
-        for i in range(5):
-            self.weeks.append(tk.Frame(self))
+        self.weeks = [tk.Frame(self) for i in range(len(self.calendar.monthdatescalendar(self.current_date.year, self.current_date.month)))]
         i = 0
-        for day in self.calendar.itermonthdates(self.now.year, self.now.month):
+        for day in self.calendar.itermonthdates(self.current_date.year, self.current_date.month):
             self.days.append(tk.Label(self.weeks[i//7], text=day.day, width=7, height=2, bg='white'))
-            if day.month != self.now.month:
+            if day.month != self.current_date.month:
                 self.days[i].config(bg = 'gray')
+            if day.year == self.now.year and day.month == self.now.month and day.day == self.now.day:
+                self.days[i].config(bg = 'red')
             i += 1
         for week in self.weeks:
             week.pack(fill="both", expand=True)
         for day in self.days:
             day.pack(side='left', fill="both", expand=True)
+        
+        
+    def left(self):
+        for day in self.days:
+            day.destroy()
+        for week in self.weeks:
+            week.destroy()
+        self.month_and_year.destroy()
+        self.button_left.destroy()
+        self.button_right.destroy()
+        self.head.destroy()
+        self.update()
+        if self.current_date.month != 1:
+            self.current_date = dt.date(self.current_date.year, self.current_date.month - 1, 1)
+        else:
+            self.current_date = dt.date(self.current_date.year - 1, self.current_date.month + 11, 1)
+        self.form()
+        
+    def right(self):
+        for day in self.days:
+            day.destroy()
+        for week in self.weeks:
+            week.destroy()
+        self.month_and_year.destroy()
+        self.button_left.destroy()
+        self.button_right.destroy()
+        self.head.destroy()
+        self.update()
+        if self.current_date.month != 12:
+            self.current_date = dt.date(self.current_date.year, self.current_date.month + 1, 1)
+        else:
+            self.current_date = dt.date(self.current_date.year + 1, 1, 1)
+        self.form()
