@@ -11,6 +11,7 @@ class Calendar(tk.LabelFrame):
         self.choosen_days = []
         self.form()
 
+    # TODO: переделать, оптимизировать
     def form(self):
         self.head = tk.Frame(self)
         self.month_and_year = tk.Label(self.head,
