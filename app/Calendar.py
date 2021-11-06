@@ -43,7 +43,6 @@ class Calendar(tk.LabelFrame):
         for day in self.days:
             day.pack(side='left', fill="both", expand=True)
         
-        
     def left(self):
         for day in self.days:
             day.destroy()
@@ -82,9 +81,9 @@ class Calendar(tk.LabelFrame):
             self.choosen_days.append(day)
         else:
             label.config(bg='white')
-            print(day)
-            print(self.now)
             if day == self.now:
                 label.config(bg='red')
             self.choosen_days.remove(day)
-        print(self.choosen_days)
+    
+    def get_choosen(self):
+        return self.choosen_days
