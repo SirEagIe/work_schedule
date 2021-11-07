@@ -1,5 +1,10 @@
-import calendar as cldr
-import datetime as dt
+import sqlite3 as sql
 
-c = cldr.Calendar(firstweekday=0)
-print(len(c.monthdatescalendar(2021, 11)))
+connection = sql.connect('test.db')
+with connection:
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM `test`")
+    rows = cursor.fetchall()
+    for row in rows:
+        print(row)
+    connection.commit()

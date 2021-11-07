@@ -29,7 +29,7 @@ class Calendar(tk.LabelFrame):
         self.weeks = [tk.Frame(self) for i in range(len(self.calendar.monthdatescalendar(self.current_date.year, self.current_date.month)))]
         i = 0
         for day in self.calendar.itermonthdates(self.current_date.year, self.current_date.month):
-            self.days.append(tk.Label(self.weeks[i//7], text=day.day, width=7, height=2, bg='white'))
+            self.days.append(tk.Label(self.weeks[i//7], text=day.day, width=7, height=2, bg='white', borderwidth=1, relief="solid"))
             if day.month == self.current_date.month:
                 self.days[i].bind('<Button-1>', lambda e, i=i, day=day: self.choose(self.days[i], day))
             if day.year == self.now.year and day.month == self.now.month and day.day == self.now.day:
