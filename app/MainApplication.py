@@ -7,6 +7,6 @@ class MainApplication(tk.Frame):
         tk.Frame .__init__(self, parent, *args, **kwargs)
         self.parent = parent
         self.tabs_list = TabsList(self, 'Добавить', 'Общий график работы', 'График работы')
-        self.tabs_list.pack(fill="both")
+        self.tabs_list.pack(fill='both')
         self.f_tab = FirstTab(self)
-        self.f_tab.pack(fill="both", expand=True)
+        self.f_tab.pack(fill='both', expand=True)

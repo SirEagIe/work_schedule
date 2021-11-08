@@ -1,9 +1,11 @@
 import sqlite3 as sql
+import datetime as dt
 
-connection = sql.connect('test.db')
+
+connection = sql.connect('app.db')
 with connection:
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM `test`")
+    cursor.execute("SELECT * FROM `work_schedule`")
     rows = cursor.fetchall()
     for row in rows:
         print(row)

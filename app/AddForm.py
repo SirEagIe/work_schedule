@@ -2,27 +2,27 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 import re
 import sqlite3 as sql
-from app.Calendar import Calendar
+from app.Calendar import AddCalendar
 
 class AddForm(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
         tk.Frame.__init__(self, parent, **kwargs)
+        self.calendar = AddCalendar(self)
+        self.calendar.pack()
+        self.fields_frame = tk.Frame(self)
         self.names = []
-        connection = sql.connect('test.db')
+        connection = sql.connect('app.db')
         with connection:
             cursor = connection.cursor()
-            cursor.execute("SELECT name FROM `test`")
+            cursor.execute("SELECT name FROM `work_schedule`")
             rows = cursor.fetchall()
             for row in rows:
                 self.names.append(row[0])
         self.names = list(set(self.names))
         self.names.sort()
-        self.calendar = Calendar(self)
-        self.calendar.pack()
-        self.fields_frame = tk.Frame(self)
-        self.name_label = tk.Label(self.fields_frame, text="ФИО")
-        self.time_label_1 = tk.Label(self.fields_frame, text="Время работы с (HH:MM)")
-        self.time_label_2 = tk.Label(self.fields_frame, text="до (HH:MM)")
+        self.name_label = tk.Label(self.fields_frame, text='ФИО')
+        self.time_label_1 = tk.Label(self.fields_frame, text='Время работы с (ЧЧ:ММ)')
+        self.time_label_2 = tk.Label(self.fields_frame, text='до (ЧЧ:ММ)')
         self.name_entry = ttk.Combobox(self.fields_frame, values=self.names)
         self.time_entry_2 = tk.Entry(self.fields_frame)
         self.time_entry_1 = tk.Entry(self.fields_frame)
@@ -57,11 +57,11 @@ class AddForm(tk.Frame):
         if message_error:
             tk.messagebox.showerror(title='Error', message=message_error)
         else:
-            connection = sql.connect('test.db')
+            connection = sql.connect('app.db')
             with connection:
                 cursor = connection.cursor()
                 for date in dates:
-                    cursor.execute(f"INSERT INTO `test` VALUES ('{name}', '{date}', '{time1}', '{time2}')")
+                    cursor.execute(f"INSERT INTO `work_schedule` VALUES ('{name}', '{date}', '{time1}', '{time2}')")
                 if not name in self.names:
                     self.names.append(name)
                     self.names.sort()
