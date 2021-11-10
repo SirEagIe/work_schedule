@@ -1,6 +1,8 @@
 import tkinter as tk
 import calendar as cldr
 import datetime as dt
+import sqlite3 as sql
+import os, sys
 
 class Calendar(tk.LabelFrame):
     def __init__(self, parent, *args, **kwargs):
@@ -105,5 +107,47 @@ class AddCalendar(Calendar):
     def get_choosen(self):
         return self.choosen_days
         
-class ViewCalendar():
-    pass
+class ViewAllCalendar(Calendar):
+    def __init__(self, parent, *args, **kwargs):
+        Calendar.__init__(self, parent, *args, **kwargs)
+        
+        
+    def form_days(self):
+        super().form_days()
+        i = 0
+        for day in self.calendar.itermonthdates(self.current_date.year, self.current_date.month):
+            if day.month == self.current_date.month:
+                self.days[i].bind('<Button-1>', lambda e, i=i, day=day: self.view_schedule(self.days[i], day))
+            i += 1
+            
+    def view_schedule(self, event, day):
+        new_window = tk.Toplevel()
+        new_window.focus_force()
+        schedule_frame = tk.Frame(new_window)
+        date_label = tk.Label(schedule_frame, text=day.strftime('%d %B %Y'))
+        date_label.grid(row=0, column=0, padx=5, pady=5, columnspan=4)
+        schedule = []
+        connection = sql.connect(os.path.abspath(os.path.dirname(sys.argv[0])) + '\\app.db')
+        with connection:
+            cursor = connection.cursor()
+            cursor.execute(f"SELECT * FROM `work_schedule` WHERE date='{day}'")
+            rows = list(cursor.fetchall())
+            for row in rows:
+                schedule.append([tk.Label(schedule_frame, text=str(row[0])),
+                    tk.Label(schedule_frame, text=str(row[2])),
+                    tk.Label(schedule_frame, text='-'),
+                    tk.Label(schedule_frame, text=str(row[3]))])
+            if not schedule:
+                tk.Label(schedule_frame, text='Записи отсутствуют').grid(row=1, column=0, padx=5, pady=5, columnspan=4)
+            for i in range(len(schedule)):
+                schedule[i][0].grid(row=i+1, column=0, padx=5, pady=5)
+                schedule[i][1].grid(row=i+1, column=1, padx=5, pady=5)
+                schedule[i][2].grid(row=i+1, column=2, padx=5, pady=5)
+                schedule[i][3].grid(row=i+1, column=3, padx=5, pady=5)
+        schedule_frame.pack(expand=True, padx=10, pady=10)
+        x_pos = (new_window.winfo_screenwidth() - new_window.winfo_width())//2
+        y_pos = (new_window.winfo_screenheight() - new_window.winfo_height())//2
+        new_window.geometry('+' + str(x_pos) + '+' + str(y_pos))
+        new_window.update()
+        new_window.minsize(new_window.winfo_width(), new_window.winfo_height())
+        new_window.bind("<Escape>", lambda event: new_window.destroy())

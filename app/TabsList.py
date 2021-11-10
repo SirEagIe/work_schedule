@@ -9,3 +9,6 @@ class TabsList(tk.LabelFrame):
             self.tabs.append(tk.Label(self, text=args[i], width=30, height=2))
         for i in range(0, self.num_of_tabs):
             self.tabs[i].pack(side='left', fill="both", expand=True)
+
+    def get_tabs(self):
+        return self.tabs

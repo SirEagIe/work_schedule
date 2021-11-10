@@ -3,6 +3,7 @@ from tkinter import messagebox, ttk
 import re
 import sqlite3 as sql
 from app.Calendar import AddCalendar
+import os, sys
 
 class AddForm(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
@@ -11,7 +12,7 @@ class AddForm(tk.Frame):
         self.calendar.pack()
         self.fields_frame = tk.Frame(self)
         self.names = []
-        connection = sql.connect('app.db')
+        connection = sql.connect(os.path.abspath(os.path.dirname(sys.argv[0])) + '\\app.db')
         with connection:
             cursor = connection.cursor()
             cursor.execute("SELECT name FROM `work_schedule`")
@@ -24,6 +25,7 @@ class AddForm(tk.Frame):
         self.time_label_1 = tk.Label(self.fields_frame, text='Время работы с (ЧЧ:ММ)')
         self.time_label_2 = tk.Label(self.fields_frame, text='до (ЧЧ:ММ)')
         self.name_entry = ttk.Combobox(self.fields_frame, values=self.names)
+        self.name_entry.bind('<Button-1>', self.search)
         self.time_entry_2 = tk.Entry(self.fields_frame)
         self.time_entry_1 = tk.Entry(self.fields_frame)
         self.apply_btn = tk.Button(self.fields_frame, text='Добавить', command=self.add)
@@ -57,7 +59,7 @@ class AddForm(tk.Frame):
         if message_error:
             tk.messagebox.showerror(title='Error', message=message_error)
         else:
-            connection = sql.connect('app.db')
+            connection = sql.connect(os.path.abspath(os.path.dirname(sys.argv[0])) + '\\app.db')
             with connection:
                 cursor = connection.cursor()
                 for date in dates:
@@ -67,6 +69,13 @@ class AddForm(tk.Frame):
                     self.names.sort()
                     self.name_entry.config(values=self.names)
                 connection.commit()
+
+    def search(self, event):
+        values = []
+        for name in self.names:
+            if self.name_entry.get().lower() in name.lower():
+                values.append(name)
+        self.name_entry.config(values=values)
     
     def validate_time(self, time):
         tpl = '^[0-2][0-9]:[0-5][0-9]$'
