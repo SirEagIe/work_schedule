@@ -1,8 +1,8 @@
 import tkinter as tk
 
-class TabsList(tk.LabelFrame):
+class TabsList(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
-        tk.LabelFrame.__init__(self, parent, **kwargs)
+        tk.Frame.__init__(self, parent, **kwargs)
         self.tabs = []
         self.num_of_tabs = len(args)
         for i in range(0, self.num_of_tabs):

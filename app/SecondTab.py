@@ -1,8 +1,8 @@
 import tkinter as tk
 from app.ViewAllForm import ViewAllForm
 
-class SecondTab(tk.LabelFrame):
+class SecondTab(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
-        tk.LabelFrame.__init__(self, parent, **kwargs)
+        tk.Frame.__init__(self, parent, **kwargs)
         self.view_all_form = ViewAllForm(self)
-        self.view_all_form.pack(side='top', expand=True)
+        self.view_all_form.pack(expand=True)

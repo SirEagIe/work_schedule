@@ -4,9 +4,9 @@ import datetime as dt
 import sqlite3 as sql
 import os, sys
 
-class Calendar(tk.LabelFrame):
+class Calendar(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
-        tk.LabelFrame.__init__(self, parent, **kwargs)
+        tk.Frame.__init__(self, parent, **kwargs)
         self.now = dt.datetime.date(dt.datetime.today())
         self.current_date = self.now
         self.calendar = cldr.Calendar(firstweekday=0)
@@ -57,7 +57,7 @@ class Calendar(tk.LabelFrame):
         for day in self.days:
             day.pack(side='left', fill='both', expand=True, padx=1, pady=1)
     
-    def update(self):
+    def update_(self):
         self.month_and_year.config(text=self.current_date.strftime('%B')+', '+self.current_date.strftime('%Y'))
         num_of_weeks = len(self.calendar.monthdatescalendar(self.current_date.year, self.current_date.month))
         while len(self.weeks) != num_of_weeks:
@@ -73,12 +73,12 @@ class Calendar(tk.LabelFrame):
             
     def left(self):
         self.current_date = self.current_date.replace(day=1) - dt.timedelta(days=1)
-        self.update()
+        self.update_()
         
     def right(self):
         self.current_date = self.current_date.replace(
             day=cldr.monthrange(self.current_date.year, self.current_date.month)[1]) + dt.timedelta(days=1)
-        self.update()
+        self.update_()
 
 
 class AddCalendar(Calendar):
