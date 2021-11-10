@@ -208,8 +208,68 @@ class ViewCalendar(Calendar):
         i = 0
         for day in self.calendar.itermonthdates(self.current_date.year, self.current_date.month):
             self.days[i].config(width=10)
-            if day.month == self.current_date.month:
-                for row in rows:
-                    if str(day) in row:
-                        self.days[i].config(text=str(day.day) + f'\n{row[2]}-{row[3]}')
+            for row in rows:
+                if str(day) in row:
+                    self.days[i].config(text=str(day.day) + f'\n{row[2]}-{row[3]}')
             i += 1
+        label_text = 'Количество часов по неделям: '
+        for i in range(len(self.weeks)):
+            label_text += str(i + 1) + ' - ' + self.get_week_time()[i] + '; '
+        label_text = label_text[:-2]
+        self.week_time_label = tk.Label(self, text=label_text)
+        label_text = 'Количество часов в месяц: ' + self.get_month_time()
+        self.month_time_label = tk.Label(self, text=label_text)
+        self.month_time_label.pack(side='bottom', pady=5)
+        self.week_time_label.pack(side='bottom', pady=5)
+        
+    def update_(self):
+        self.week_time_label.destroy()
+        self.month_time_label.destroy()
+        super().update_()
+    
+    def get_week_time(self):
+        connection = sql.connect(os.path.abspath(os.path.dirname(sys.argv[0])) + '\\app.db')
+        with connection:
+            cursor = connection.cursor()
+            self.week_time = []
+            for week in self.calendar.monthdatescalendar(self.current_date.year, self.current_date.month):
+                week_time = dt.timedelta(hours=0, minutes=0)
+                for day in week:
+                    cursor.execute(f"SELECT * FROM `work_schedule` WHERE name='{self.name}' AND date='{str(day)}'")
+                    rows = cursor.fetchall()
+                    for row in rows:
+                        week_time += dt.timedelta(hours=int(row[3][0]+row[3][1]), minutes=int(row[3][3]+row[3][4])) \
+                            - dt.timedelta(hours=int(row[2][0]+row[2][1]), minutes=int(row[2][3]+row[2][4]))
+                days = week_time.days
+                minutes = week_time.seconds // 60
+                hours = str(24 * days + minutes // 60)
+                minutes = str(minutes % 60)
+                if len(hours) < 2:
+                    hours = '0' + hours
+                if len(minutes) < 2:
+                    minutes = '0' + minutes
+                self.week_time.append(hours + ':' + minutes)
+        return self.week_time
+    
+    def get_month_time(self):
+        self.month_time = dt.timedelta(hours=0, minutes=0)
+        connection = sql.connect(os.path.abspath(os.path.dirname(sys.argv[0])) + '\\app.db')
+        with connection:
+            cursor = connection.cursor()
+            for day in self.calendar.itermonthdates(self.current_date.year, self.current_date.month):
+                if day.month == self.current_date.month and day.year == self.current_date.year:
+                    cursor.execute(f"SELECT * FROM `work_schedule` WHERE name='{self.name}' AND date='{str(day)}'")
+                    rows = cursor.fetchall()
+                    for row in rows:
+                        self.month_time += dt.timedelta(hours=int(row[3][0]+row[3][1]), minutes=int(row[3][3]+row[3][4])) \
+                            - dt.timedelta(hours=int(row[2][0]+row[2][1]), minutes=int(row[2][3]+row[2][4]))
+            days = self.month_time.days
+            minutes = self.month_time.seconds // 60
+            hours = str(24 * days + minutes // 60)
+            minutes = str(minutes % 60)
+            if len(hours) < 2:
+                hours = '0' + hours
+            if len(minutes) < 2:
+                minutes = '0' + minutes
+            self.month_time = hours + ':' + minutes
+        return self.month_time

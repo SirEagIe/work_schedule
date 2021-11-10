@@ -30,13 +30,13 @@ class AddForm(tk.Frame):
         self.time_entry_2 = tk.Entry(self.fields_frame)
         self.time_entry_1 = tk.Entry(self.fields_frame)
         self.apply_btn = tk.Button(self.fields_frame, text='Добавить', command=self.add)
-        self.name_label.grid(row=0, column=0)
-        self.time_label_1.grid(row=1, column=0)
-        self.time_label_2.grid(row=2, column=0)
-        self.name_entry.grid(row=0, column=1)
-        self.time_entry_1.grid(row=1, column=1)
-        self.time_entry_2.grid(row=2, column=1)
-        self.apply_btn.grid(row=3, column=0, columnspan=2)
+        self.name_label.grid(row=0, column=0, pady=5)
+        self.time_label_1.grid(row=1, column=0, pady=5)
+        self.time_label_2.grid(row=2, column=0, pady=5)
+        self.name_entry.grid(row=0, column=1, pady=5)
+        self.time_entry_1.grid(row=1, column=1, pady=5)
+        self.time_entry_2.grid(row=2, column=1, pady=5)
+        self.apply_btn.grid(row=3, column=0, pady=5, columnspan=2)
         self.fields_frame.pack(expand=True)
 
     def add(self):
@@ -55,6 +55,8 @@ class AddForm(tk.Frame):
         if self.validate_time(self.time_entry_1.get(), self.time_entry_2.get()):
             time1 = self.time_entry_1.get()
             time2 = self.time_entry_2.get()
+            time1 = time1[:2] + ':' + time1[2 + 1:]
+            time2 = time2[:2] + ':' + time2[2 + 1:]
         else:
             message_error += 'Время введено неверно\n'
         connection = sql.connect(os.path.abspath(os.path.dirname(sys.argv[0])) + '\\app.db')

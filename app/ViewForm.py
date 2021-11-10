@@ -18,11 +18,11 @@ class ViewForm(tk.Frame):
                 self.names.append(row[0])
         self.names = list(set(self.names))
         self.names.sort()
-        self.name_entry = ttk.Combobox(self.enter_frame, values=self.names)
+        self.name_entry = ttk.Combobox(self.enter_frame, values=self.names, width=45)
         self.name_entry.bind('<Button-1>', self.search)
-        self.name_entry.pack(fill='both', expand=True)
+        self.name_entry.pack(fill='both', expand=True, pady=10)
         self.apply_btn = tk.Button(self.enter_frame, text='Посмотреть график', command=self.view_scedule)
-        self.apply_btn.pack(fill='both', expand=True)
+        self.apply_btn.pack(fill='both', expand=True, pady=10)
         self.enter_frame.pack(fill='both', expand=True)
         
     def view_scedule(self):
@@ -31,9 +31,8 @@ class ViewForm(tk.Frame):
             self.schedule_frame = tk.Frame(self)
             self.calendar = ViewCalendar(self.schedule_frame, self.name_entry.get())
             self.calendar.pack()
-            
-            self.back_btn = tk.Button(self.schedule_frame, text='Назад', command=self.back)
-            self.back_btn.pack(fill='both', expand=True)
+            self.back_btn = tk.Button(self.schedule_frame, text='Назад', width=30, command=self.back)
+            self.back_btn.pack(pady=5)
             self.schedule_frame.pack(fill='both', expand=True)
         else:
             tk.messagebox.showerror(title='Error', message='Сотрудник не найден')
