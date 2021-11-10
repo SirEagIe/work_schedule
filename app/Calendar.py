@@ -111,7 +111,6 @@ class ViewAllCalendar(Calendar):
     def __init__(self, parent, *args, **kwargs):
         Calendar.__init__(self, parent, *args, **kwargs)
         
-        
     def form_days(self):
         super().form_days()
         i = 0
@@ -121,33 +120,96 @@ class ViewAllCalendar(Calendar):
             i += 1
             
     def view_schedule(self, event, day):
-        new_window = tk.Toplevel()
-        new_window.focus_force()
-        schedule_frame = tk.Frame(new_window)
-        date_label = tk.Label(schedule_frame, text=day.strftime('%d %B %Y'))
-        date_label.grid(row=0, column=0, padx=5, pady=5, columnspan=4)
-        schedule = []
+        self.new_window = tk.Toplevel()
+        self.new_window.focus_force()
+        self.schedule_frame = tk.Frame(self.new_window)
+        date_label = tk.Label(self.schedule_frame, text=day.strftime('%d %B %Y'))
+        date_label.grid(row=0, column=0, padx=5, pady=5, columnspan=5)
+        self.schedule = []
         connection = sql.connect(os.path.abspath(os.path.dirname(sys.argv[0])) + '\\app.db')
         with connection:
             cursor = connection.cursor()
-            cursor.execute(f"SELECT * FROM `work_schedule` WHERE date='{day}'")
+            cursor.execute(f"SELECT * FROM `work_schedule` WHERE date='{day}' ORDER BY name")
             rows = list(cursor.fetchall())
             for row in rows:
-                schedule.append([tk.Label(schedule_frame, text=str(row[0])),
-                    tk.Label(schedule_frame, text=str(row[2])),
-                    tk.Label(schedule_frame, text='-'),
-                    tk.Label(schedule_frame, text=str(row[3]))])
-            if not schedule:
-                tk.Label(schedule_frame, text='Записи отсутствуют').grid(row=1, column=0, padx=5, pady=5, columnspan=4)
-            for i in range(len(schedule)):
-                schedule[i][0].grid(row=i+1, column=0, padx=5, pady=5)
-                schedule[i][1].grid(row=i+1, column=1, padx=5, pady=5)
-                schedule[i][2].grid(row=i+1, column=2, padx=5, pady=5)
-                schedule[i][3].grid(row=i+1, column=3, padx=5, pady=5)
-        schedule_frame.pack(expand=True, padx=10, pady=10)
-        x_pos = (new_window.winfo_screenwidth() - new_window.winfo_width())//2
-        y_pos = (new_window.winfo_screenheight() - new_window.winfo_height())//2
-        new_window.geometry('+' + str(x_pos) + '+' + str(y_pos))
-        new_window.update()
-        new_window.minsize(new_window.winfo_width(), new_window.winfo_height())
-        new_window.bind("<Escape>", lambda event: new_window.destroy())
+                self.schedule.append([tk.Label(self.schedule_frame, text=str(row[0])),
+                    tk.Label(self.schedule_frame, text=str(row[2])),
+                    tk.Label(self.schedule_frame, text='-'),
+                    tk.Label(self.schedule_frame, text=str(row[3])),
+                    tk.Button(self.schedule_frame, text='X')])
+            if not self.schedule:
+                tk.Label(self.schedule_frame, text='Записи отсутствуют').grid(row=1, column=0, padx=5, pady=5, columnspan=4)
+            for i in range(len(self.schedule)):
+                self.schedule[i][0].grid(row=i+1, column=0, padx=5, pady=5)
+                self.schedule[i][1].grid(row=i+1, column=1, padx=5, pady=5)
+                self.schedule[i][2].grid(row=i+1, column=2, padx=5, pady=5)
+                self.schedule[i][3].grid(row=i+1, column=3, padx=5, pady=5)
+                self.schedule[i][4].config(command=lambda row=rows[i], i=i: self.delete(row, i))
+                self.schedule[i][4].grid(row=i+1, column=4, padx=5, pady=5)
+        self.schedule_frame.pack(expand=True, padx=10, pady=10)
+        x_pos = (self.new_window.winfo_screenwidth() - self.new_window.winfo_width())//2
+        y_pos = (self.new_window.winfo_screenheight() - self.new_window.winfo_height())//2
+        self.new_window.geometry('+' + str(x_pos) + '+' + str(y_pos))
+        self.new_window.update()
+        self.new_window.minsize(self.new_window.winfo_width(), self.new_window.winfo_height())
+        self.new_window.bind("<Escape>", lambda event: self.new_window.destroy())
+    
+    def delete(self, row, i):
+        connection = sql.connect(os.path.abspath(os.path.dirname(sys.argv[0])) + '\\app.db')
+        with connection:
+            cursor = connection.cursor()
+            cursor.execute(f"DELETE FROM `work_schedule` WHERE name='{row[0]}' AND date='{row[1]}' AND time1='{row[2]}' AND time2='{row[3]}'")
+            connection.commit()
+        for j in range(len(self.schedule[i])):
+            self.schedule[i][j].grid_forget()
+        restore_button = tk.Button(self.schedule_frame, text='Восстановить')
+        restore_button.config(command=lambda restore_button=restore_button, row=row, i=i: self.restore(restore_button, row, i))
+        restore_button.grid(row=i+1, column=0, padx=5, pady=5, columnspan=5)
+    
+    def restore(self, r_btn, row, i):
+        r_btn.grid_forget()
+        self.schedule[i][0].grid(row=i+1, column=0, padx=5, pady=5)
+        self.schedule[i][1].grid(row=i+1, column=1, padx=5, pady=5)
+        self.schedule[i][2].grid(row=i+1, column=2, padx=5, pady=5)
+        self.schedule[i][3].grid(row=i+1, column=3, padx=5, pady=5)
+        self.schedule[i][4].config(command=lambda row=row, i=i: self.delete(row, i))
+        self.schedule[i][4].grid(row=i+1, column=4, padx=5, pady=5)
+        connection = sql.connect(os.path.abspath(os.path.dirname(sys.argv[0])) + '\\app.db')
+        with connection:
+            cursor = connection.cursor()
+            cursor.execute(f"INSERT INTO `work_schedule` VALUES ('{row[0]}', '{row[1]}', '{row[2]}', '{row[3]}')")
+            connection.commit()
+
+
+class ViewCalendar(Calendar):
+    def __init__(self, parent, name, *args, **kwargs):
+        self.name = name
+        Calendar.__init__(self, parent, *args, **kwargs)
+    
+    def form_head(self):
+        super().form_head()
+        self.month_and_year.config(width=65)
+        
+    def form_weeks(self):
+        super().form_weeks()
+        for name_of_week in self.name_of_weeks:
+            name_of_week.config(width=10)
+    
+    def form_days(self):
+        super().form_days()
+        connection = sql.connect(os.path.abspath(os.path.dirname(sys.argv[0])) + '\\app.db')
+        rows = []
+        with connection:
+            cursor = connection.cursor()
+            cursor.execute(f"SELECT * FROM `work_schedule` WHERE name='{self.name}'")
+            rows_ = cursor.fetchall()
+            for row in rows_:
+                rows.append(list(row))
+        i = 0
+        for day in self.calendar.itermonthdates(self.current_date.year, self.current_date.month):
+            self.days[i].config(width=10)
+            if day.month == self.current_date.month:
+                for row in rows:
+                    if str(day) in row:
+                        self.days[i].config(text=str(day.day) + f'\n{row[2]}-{row[3]}')
+            i += 1

@@ -3,6 +3,7 @@ from tkinter import messagebox, ttk
 import re
 import sqlite3 as sql
 from app.Calendar import AddCalendar
+import datetime as dt
 import os, sys
 
 class AddForm(tk.Frame):
@@ -51,11 +52,19 @@ class AddForm(tk.Frame):
         else:
             message_error += 'Имя не введено\n'
         time1, time2 = '', ''
-        if self.validate_time(self.time_entry_1.get()) and self.validate_time(self.time_entry_2.get()):
+        if self.validate_time(self.time_entry_1.get(), self.time_entry_2.get()):
             time1 = self.time_entry_1.get()
             time2 = self.time_entry_2.get()
         else:
             message_error += 'Время введено неверно\n'
+        connection = sql.connect(os.path.abspath(os.path.dirname(sys.argv[0])) + '\\app.db')
+        with connection:
+            cursor = connection.cursor()
+            for date in dates:
+                cursor.execute(f"SELECT * FROM `work_schedule` WHERE name='{name}' AND date='{date}'")
+                rows = cursor.fetchall()
+                if len(rows) != 0:
+                    message_error += f'Для данного человека уже записаны часы работы\nна {date.strftime("%d %B %Y")}\n'
         if message_error:
             tk.messagebox.showerror(title='Error', message=message_error)
         else:
@@ -77,9 +86,13 @@ class AddForm(tk.Frame):
                 values.append(name)
         self.name_entry.config(values=values)
     
-    def validate_time(self, time):
-        tpl = '^[0-2][0-9]:[0-5][0-9]$'
-        if re.match(tpl, time):
-            return True
-        else:
+    def validate_time(self, time1, time2):
+        try:
+            t1 = dt.timedelta(hours=int(time1[0]+time1[1]), minutes=int(time1[3]+time1[4]))
+            t2 = dt.timedelta(days=1, hours=int(time2[0]+time2[1]), minutes=int(time2[3]+time2[4]))
+            if t1.days != 0 or t2.days != 1 or (t2 - t1).days == 0:
+                return False
+            else:
+                return True            
+        except:
             return False

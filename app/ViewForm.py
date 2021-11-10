@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
 import sqlite3 as sql
-from app.Calendar import ViewAllCalendar
+from app.Calendar import ViewCalendar
 import os, sys
 
 class ViewForm(tk.Frame):
@@ -26,14 +26,17 @@ class ViewForm(tk.Frame):
         self.enter_frame.pack(fill='both', expand=True)
         
     def view_scedule(self):
-        self.enter_frame.pack_forget()
-        self.schedule_frame = tk.Frame(self)
-        self.calendar = ViewAllCalendar(self.schedule_frame)
-        self.calendar.pack()
-        
-        self.back_btn = tk.Button(self.schedule_frame, text='Назад', command=self.back)
-        self.back_btn.pack(fill='both', expand=True)
-        self.schedule_frame.pack(fill='both', expand=True)
+        if self.name_entry.get() in self.names:
+            self.enter_frame.pack_forget()
+            self.schedule_frame = tk.Frame(self)
+            self.calendar = ViewCalendar(self.schedule_frame, self.name_entry.get())
+            self.calendar.pack()
+            
+            self.back_btn = tk.Button(self.schedule_frame, text='Назад', command=self.back)
+            self.back_btn.pack(fill='both', expand=True)
+            self.schedule_frame.pack(fill='both', expand=True)
+        else:
+            tk.messagebox.showerror(title='Error', message='Сотрудник не найден')
 
     def back(self):
         self.schedule_frame.destroy()
